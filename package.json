@@ -2,10 +2,10 @@
   "name": "google-form-parser-proxy",
   "version": "1.0.0",
   "description": "Proxy server for Google Form Parser to bypass CORS issues",
-  "main": "proxy-server.js",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node proxy-server.js",
-    "dev": "nodemon proxy-server.js",
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js",
     "build": "echo 'Build completed'"
   },
   "dependencies": {
