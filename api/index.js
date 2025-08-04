@@ -9,8 +9,16 @@ const app = express();
 // Enable CORS for all routes
 app.use(cors());
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '..')));
+// Serve static files with proper MIME types
+app.use(express.static(path.join(__dirname, '..'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        } else if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        }
+    }
+}));
 
 // Proxy endpoint
 app.get('/api/proxy', async (req, res) => {
