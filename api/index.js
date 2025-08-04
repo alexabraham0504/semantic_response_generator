@@ -9,6 +9,9 @@ const app = express();
 // Enable CORS for all routes
 app.use(cors());
 
+// Parse JSON bodies
+app.use(express.json());
+
 // Serve static files with proper MIME types
 app.use(express.static(path.join(__dirname, '..'), {
     setHeaders: (res, path) => {
@@ -63,6 +66,153 @@ app.get('/api/proxy', async (req, res) => {
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Proxy server is running' });
+});
+
+// Configuration endpoint
+app.get('/api/config', (req, res) => {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
+    // Return configuration data
+    const config = {
+        hasApiKey: !!process.env.GEMINI_API_KEY,
+        apiKeyConfigured: true, // This will be true if the environment variable is set
+        environment: process.env.NODE_ENV || 'development'
+    };
+
+    res.json(config);
+});
+
+// Gemini API endpoint
+app.post('/api/gemini', async (req, res) => {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
+    const { prompt } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        return res.status(500).json({ error: 'Gemini API key not configured' });
+    }
+
+    if (!prompt) {
+        return res.status(400).json({ error: 'Prompt is required' });
+    }
+
+    try {
+        const models = [
+            'gemini-2.5-pro',
+            'gemini-2.0-flash-exp',
+            'gemini-2.0-flash',
+            'gemini-1.5-flash',
+            'gemini-pro'
+        ];
+        
+        for (const model of models) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+                
+                console.log(`Trying Gemini model: ${model}`);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 4096,
+                            candidateCount: 1
+                        },
+                        safetySettings: [
+                            {
+                                category: "HARM_CATEGORY_HARASSMENT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_HATE_SPEECH", 
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`Gemini API Error (${model}):`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        error: errorText
+                    });
+                    
+                    if (model === models[models.length - 1]) {
+                        // Last model failed, throw error
+                        throw new Error(`All Gemini models failed. Last error: ${response.status} - ${response.statusText}`);
+                    }
+                    continue; // Try next model
+                }
+
+                const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error('Invalid response format from Gemini API');
+                }
+                
+                console.log(`Successfully used Gemini model: ${model}`);
+                return res.json({ 
+                    text: data.candidates[0].content.parts[0].text,
+                    model: model
+                });
+                
+            } catch (error) {
+                console.error(`Gemini API call error (${model}):`, error);
+                
+                if (model === models[models.length - 1]) {
+                    // Last model failed, throw error
+                    throw error;
+                }
+                // Continue to next model
+            }
+        }
+    } catch (error) {
+        console.error('Gemini API error:', error);
+        res.status(500).json({ 
+            error: 'Failed to generate response',
+            details: error.message 
+        });
+    }
 });
 
 // Serve the main HTML file
