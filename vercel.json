@@ -16,10 +16,6 @@
       "dest": "/api/index.js"
     },
     {
-      "src": "/generator.html",
-      "dest": "/public/generator.html"
-    },
-    {
       "src": "/styles.css",
       "dest": "/public/styles.css"
     },
