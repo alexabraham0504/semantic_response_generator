@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Form Parser Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+        }
+        
+        .code-block {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .test-form {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .test-form textarea {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            resize: vertical;
+        }
+        
+        .test-form button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        
+        .test-form button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .results {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .question-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .question-text {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .question-type {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .question-options {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Google Form Parser Test</h1>
+            <p>Test the standalone Google Form parser functionality</p>
+        </header>
+
+        <div class="test-section">
+            <h2>How to Use the Parser</h2>
+            <p>The Google Form Parser can extract questions from Google Form HTML by parsing the embedded <code>FB_PUBLIC_LOAD_DATA_</code> variable.</p>
+            
+            <h3>Basic Usage:</h3>
+            <div class="code-block">
+// Get the HTML content of a Google Form
+const formHtml = "&lt;html&gt;...&lt;/html&gt;";
+
+// Parse the form and extract questions
+const questions = GoogleFormParser.parseFormHtml(formHtml);
+
+// Each question object contains:
+// {
+//   text: "Question text",
+//   type: "short_answer" | "long_answer" | "multiple_choice" | "checkboxes",
+//   options: ["option1", "option2", ...] // for multiple choice/checkbox questions
+// }
+            </div>
+        </div>
+
+        <div class="test-form">
+            <h2>Test the Parser</h2>
+            <p>Paste the HTML content of a Google Form below to test the parser:</p>
+            
+            <textarea id="formHtml" placeholder="Paste Google Form HTML here..."></textarea>
+            
+            <button onclick="testParser()">Parse Form</button>
+            
+            <div id="results" class="results" style="display: none;">
+                <h3>Parsed Questions:</h3>
+                <div id="questionsList"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Supported Question Types</h2>
+            <ul>
+                <li><strong>short_answer</strong>: Single-line text input</li>
+                <li><strong>long_answer</strong>: Multi-line paragraph text</li>
+                <li><strong>multiple_choice</strong>: Radio button selection (choose one)</li>
+                <li><strong>checkboxes</strong>: Multiple selection options (choose many)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>How to Get Google Form HTML</h2>
+            <ol>
+                <li>Open a public Google Form in your browser</li>
+                <li>Right-click on the page and select "View Page Source"</li>
+                <li>Copy the entire HTML content</li>
+                <li>Paste it in the textarea above</li>
+                <li>Click "Parse Form" to extract questions</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function testParser() {
+            const formHtml = document.getElementById('formHtml').value.trim();
+            const resultsDiv = document.getElementById('results');
+            const questionsList = document.getElementById('questionsList');
+            
+            if (!formHtml) {
+                alert('Please paste Google Form HTML content first.');
+                return;
+            }
+            
+            try {
+                // Use the standalone parser
+                const questions = GoogleFormParser.parseFormHtml(formHtml);
+                
+                if (questions.length === 0) {
+                    questionsList.innerHTML = '<p style="color: #6b7280; font-style: italic;">No questions found in the provided HTML.</p>';
+                } else {
+                    let html = '';
+                    questions.forEach((question, index) => {
+                        html += `
+                            <div class="question-item">
+                                <div class="question-text">
+                                    <strong>${index + 1}.</strong> ${question.text}
+                                </div>
+                                <span class="question-type">${question.type}</span>
+                                ${question.options && question.options.length > 0 ? 
+                                    `<div class="question-options">
+                                        <strong>Options:</strong> ${question.options.join(', ')}
+                                    </div>` : ''
+                                }
+                            </div>
+                        `;
+                    });
+                    questionsList.innerHTML = html;
+                }
+                
+                resultsDiv.style.display = 'block';
+                
+            } catch (error) {
+                questionsList.innerHTML = `<p style="color: #dc2626;">Error: ${error.message}</p>`;
+                resultsDiv.style.display = 'block';
+            }
+        }
+        
+        // Add sample HTML for testing
+        document.getElementById('formHtml').value = '<!-- Sample Google Form HTML structure -->\n<html>\n<head>\n    <title>Sample Form</title>\n</head>\n<body>\n    <script>\n        var FB_PUBLIC_LOAD_DATA_ = [\n            null, null, null, [\n                ["What is your favorite color?", "multiple_choice", null, [0], [["Red"], ["Blue"], ["Green"]]],\n                ["Describe your experience", "paragraph", null, [1], []],\n                ["Which features do you use?", "checkboxes", null, [2], [["Feature A"], ["Feature B"], ["Feature C"]]],\n                ["What is your name?", "short_text", null, [3], []]\n            ]\n        ];\n    </script>\n</body>\n</html>';
+    </script>
+</body>
+</html> 

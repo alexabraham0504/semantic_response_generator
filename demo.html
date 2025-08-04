@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Form Parser - Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .demo-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+        }
+        
+        .demo-url {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 1rem 0;
+        }
+        
+        .demo-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .demo-step {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .demo-step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Google Form Parser - Demo</h1>
+            <p>See how the application works with a sample form</p>
+        </header>
+
+        <div class="demo-section">
+            <h2>Try the Demo</h2>
+            <p>Use this sample Google Form URL to test the application:</p>
+            <div class="demo-url">
+                https://docs.google.com/forms/d/e/1FAIpQLSfSampleForm123/viewform
+            </div>
+            <p><em>Note: This is a demo URL. The application will show mock results to demonstrate functionality.</em></p>
+        </div>
+
+        <div class="demo-steps">
+            <div class="demo-step">
+                <div class="demo-step-number">1</div>
+                <h3>Enter URL</h3>
+                <p>Paste the Google Form URL in the input field</p>
+            </div>
+            <div class="demo-step">
+                <div class="demo-step-number">2</div>
+                <h3>Parse Form</h3>
+                <p>Click "Parse Form" to extract questions</p>
+            </div>
+            <div class="demo-step">
+                <div class="demo-step-number">3</div>
+                <h3>View Results</h3>
+                <p>See extracted questions with types and options</p>
+            </div>
+            <div class="demo-step">
+                <div class="demo-step-number">4</div>
+                <h3>Export Data</h3>
+                <p>Export as JSON or copy to clipboard</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="formUrl" class="label">Google Form URL</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="url" 
+                            id="formUrl" 
+                            class="input-field"
+                            placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                            value="https://docs.google.com/forms/d/e/1FAIpQLSfSampleForm123/viewform"
+                            required
+                        >
+                        <button id="parseBtn" class="parse-btn">
+                            <span class="btn-text">Parse Form</span>
+                            <span class="loading-spinner" style="display: none;"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2>Extracted Questions</h2>
+                    <div class="stats">
+                        <span id="totalQuestions" class="stat">0 questions found</span>
+                        <span id="filteredQuestions" class="stat">0 personal info questions filtered</span>
+                    </div>
+                </div>
+
+                <div class="questions-container" id="questionsContainer">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+
+                <div class="export-section">
+                    <button id="exportBtn" class="export-btn">Export to JSON</button>
+                    <button id="copyBtn" class="copy-btn">Copy to Clipboard</button>
+                </div>
+            </div>
+
+            <div class="error-section" id="errorSection" style="display: none;">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>What You'll See</h3>
+            <ul>
+                <li>Questions automatically categorized by type</li>
+                <li>Personal information questions filtered out</li>
+                <li>Multiple choice options displayed</li>
+                <li>Exportable results in JSON format</li>
+                <li>Responsive design that works on all devices</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

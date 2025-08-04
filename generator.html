@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Form Response Generator with Gemini AI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Rockets -->
+    <div class="rocket-container">
+        <div class="rocket horizontal">
+            <div class="rocket-body">
+                <div class="body"></div>
+                <div class="fin fin-left"></div>
+                <div class="fin fin-right"></div>
+                <div class="window"></div>
+            </div>
+            <div class="exhaust-flame"></div>
+            <ul class="exhaust-fumes">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+        <div class="rocket vertical">
+            <div class="rocket-body">
+                <div class="body"></div>
+                <div class="fin fin-left"></div>
+                <div class="fin fin-right"></div>
+                <div class="window"></div>
+            </div>
+            <div class="exhaust-flame"></div>
+            <ul class="exhaust-fumes">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Google Form Response Generator (V2)</h1>
+            <p>Generate AI-powered responses with controlled sentiment using Gemini API</p>
+        </header>
+
+        <main class="main-content">
+                    <!-- API Key Configuration (Hidden) -->
+        <div class="api-section" style="display: none;">
+            <div class="form-group">
+                <label for="apiKey" class="label">Gemini API Key</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="apiKey" 
+                        class="input-field"
+                        placeholder="Enter your Gemini API key here"
+                        required
+                    >
+                    <button id="toggleApiKey" class="toggle-btn" type="button">
+                        <span class="eye-icon">👁️</span>
+                    </button>
+                </div>
+                <small class="help-text">
+                    Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>
+                </small>
+            </div>
+        </div>
+
+            <!-- Form URL Input -->
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="formUrl" class="label">Google Form URL</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="url" 
+                            id="formUrl" 
+                            class="input-field"
+                            placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                            required
+                        >
+                        <button id="parseBtn" class="parse-btn">
+                            <span class="btn-text">Parse Form</span>
+                            <span class="loading-spinner" style="display: none;"></span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Manual HTML Input (Alternative) -->
+                <div class="form-group">
+                    <label for="formHtml" class="label">Or Paste Form HTML (Alternative)</label>
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="formHtml" 
+                            class="input-field"
+                            placeholder="Paste the HTML content of the Google Form here..."
+                            rows="4"
+                            style="resize: vertical;"
+                        ></textarea>
+                        <button id="parseHtmlBtn" class="parse-btn">
+                            <span class="btn-text">Parse HTML</span>
+                            <span class="loading-spinner" style="display: none;"></span>
+                        </button>
+                    </div>
+                    <small class="help-text">
+                        If the URL parsing fails, you can manually copy the form HTML from the browser's "View Page Source"
+                    </small>
+                </div>
+            </div>
+
+            <!-- Sentiment Configuration -->
+            <div class="sentiment-section" id="sentimentSection" style="display: none;">
+                <h3>Sentiment Distribution</h3>
+                <p class="section-description">Adjust the sentiment distribution for generated responses (must total 100%)</p>
+                
+                <div class="slider-container">
+                    <div class="slider-group">
+                        <label for="positiveSlider" class="slider-label">
+                            Positive: <span id="positiveValue">33</span>%
+                        </label>
+                        <input 
+                            type="range" 
+                            id="positiveSlider" 
+                            class="sentiment-slider positive-slider"
+                            min="0" 
+                            max="100" 
+                            value="33"
+                        >
+                    </div>
+                    
+                    <div class="slider-group">
+                        <label for="neutralSlider" class="slider-label">
+                            Neutral: <span id="neutralValue">34</span>%
+                        </label>
+                        <input 
+                            type="range" 
+                            id="neutralSlider" 
+                            class="sentiment-slider neutral-slider"
+                            min="0" 
+                            max="100" 
+                            value="34"
+                        >
+                    </div>
+                    
+                    <div class="slider-group">
+                        <label for="negativeSlider" class="slider-label">
+                            Negative: <span id="negativeValue">33</span>%
+                        </label>
+                        <input 
+                            type="range" 
+                            id="negativeSlider" 
+                            class="sentiment-slider negative-slider"
+                            min="0" 
+                            max="100" 
+                            value="33"
+                        >
+                    </div>
+                </div>
+                
+                <div class="total-display">
+                    <span class="total-label">Total: <span id="totalValue">100</span>%</span>
+                    <span id="totalStatus" class="total-status valid">✓ Valid</span>
+                </div>
+
+                <!-- Response Count -->
+                <div class="response-count-section">
+                    <label for="responseCount" class="label">Number of Responses to Generate</label>
+                    <input 
+                        type="number" 
+                        id="responseCount" 
+                        class="input-field"
+                        min="1" 
+                        max="10" 
+                        value="3"
+                    >
+                    <small class="help-text">Maximum 10 responses per generation</small>
+                </div>
+
+                <button id="generateBtn" class="generate-btn" disabled>
+                    <span class="btn-text">Generate Responses</span>
+                    <span class="loading-spinner" style="display: none;"></span>
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2>Generated Responses</h2>
+                    <div class="export-buttons">
+                        <button id="exportCsvBtn" class="export-btn">Download CSV</button>
+                        <button id="exportJsonBtn" class="export-btn">Download JSON</button>
+                    </div>
+                </div>
+
+                <div class="responses-container" id="responsesContainer">
+                    <!-- Generated responses will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Error Section -->
+            <div class="error-section" id="errorSection" style="display: none;">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+        </main>
+
+        <div class="info-section">
+            <h3>How it works</h3>
+            <ul>
+                <li>API key is automatically configured</li>
+                <li>Paste a public Google Form URL</li>
+                <li>Adjust sentiment distribution sliders</li>
+                <li>Generate AI-powered responses with controlled sentiment</li>
+                <li>Download results as CSV or JSON</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
