@@ -174,3 +174,4 @@ out/
 # Local configuration files
 config.local.js
 config.local.json 
+.vercel

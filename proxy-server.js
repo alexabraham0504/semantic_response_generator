@@ -1,14 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const path = require('path');
 
 const app = express();
-const PORT = 3000;
 
 // Enable CORS for all routes
 app.use(cors());
 
 // Serve static files from the current directory
+app.use(express.static(__dirname));
 app.use(express.static('.'));
 
 // Proxy endpoint
@@ -56,10 +57,31 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Proxy server is running' });
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
-    console.log(`📝 Open http://localhost:${PORT} in your browser to use the app`);
-    console.log(`🔧 Proxy endpoint: http://localhost:${PORT}/proxy?url=<google-form-url>`);
+// Serve the main HTML file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+// Handle all other routes by serving the appropriate HTML files
+app.get('/:page', (req, res) => {
+    const page = req.params.page;
+    const validPages = ['generator', 'demo', 'parser-test'];
+    
+    if (validPages.includes(page)) {
+        res.sendFile(path.join(__dirname, `${page}.html`));
+    } else {
+        res.sendFile(path.join(__dirname, 'index.html'));
+    }
+});
+
+// Only start the server if we're not in a serverless environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
+        console.log(`📝 Open http://localhost:${PORT} in your browser to use the app`);
+        console.log(`🔧 Proxy endpoint: http://localhost:${PORT}/proxy?url=<google-form-url>`);
+    });
+}
 
 module.exports = app; 
